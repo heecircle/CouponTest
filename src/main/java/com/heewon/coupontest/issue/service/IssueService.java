@@ -1,7 +1,10 @@
 package com.heewon.coupontest.issue.service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -21,6 +24,7 @@ public class IssueService {
 	private final EventRepository eventRepository;
 	private final CouponRepository couponRepository;
 	private final CouponLogRepository couponLogRepository;
+	private final RedissonClient redissonClient;
 
 	public void issueCouponDefault(LocalDateTime localDateTime, long eventId, long couponId, long memberId) throws
 		Exception {
@@ -75,7 +79,7 @@ public class IssueService {
 
 		if (coupon.getCount() > 0) {
 			coupon.setCount(coupon.getCount() - 1);
-			System.out.println("coupon decrease");
+			// System.out.println("coupon decrease");
 		} else {
 			throw new NotFoundException("coupon");
 		}
@@ -96,6 +100,22 @@ public class IssueService {
 
 	void issueCouponLog(Long couponId, Long userId) {
 		couponLogRepository.insertLog(couponId, userId);
+	}
+
+	public void issueCouponRedisson(LocalDateTime localDateTime, long eventId, long couponId, long memberId) {
+		RLock rLock = redissonClient.getLock(String.valueOf(couponId));
+		try {
+			if (!rLock.tryLock(15, 1, TimeUnit.SECONDS)) {
+				throw new InterruptedException();
+			}
+			issueCouponDefault(localDateTime, eventId, couponId, memberId);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			rLock.unlock();
+		}
 	}
 
 }

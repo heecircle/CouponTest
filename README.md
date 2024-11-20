@@ -122,6 +122,16 @@ select 시점에 [pessimistic lock](#pessimistic-lock) 적용하여 값을 호�
 
 ![img.png](IMG/img_4.png)
 
+### Case 4: Redisson 적용
+
+redis 활용한 분산락 적용하기
+redisson client 설정
+pub sub 기능을 활용한 Lock 적용
+
+## 10000 thread test
+
+![img_5](IMG/img_5.png)
+
 ### Transactional?
 
 ### Synchronized?

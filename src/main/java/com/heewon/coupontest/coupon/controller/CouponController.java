@@ -22,7 +22,7 @@ public class CouponController {
 
 	@GetMapping("/decreaseCoupon")
 	public String decreaseCoupon(@RequestBody CouponDecreaseRequestDto couponDecreaseRequestDto) throws Exception {
-		issueService.issueCouponDefault(LocalDateTime.now(), 1L, 1L, couponDecreaseRequestDto.getUserId());
+		issueService.issueCouponRedisson(LocalDateTime.now(), 1L, 1L, couponDecreaseRequestDto.getUserId());
 		return "success";
 	}
 
