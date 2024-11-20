@@ -89,7 +89,7 @@ void issueCouponStatus(Long couponId) {
 
 - Dirty Checking 을 통해 coupon에 대한 값을 업데이트 하는 케이스 before 500, after 500 -> 642ms
     - 이 경우는, 트랜잭션 종료 시점에 반영돼서 여러 트랜잭션이 같은 엔티티를 동시에 수정하면, 나중에 커밋된 트랜잭션이 이전 트랜잭션의 결과를 덮어 쓸 수 있기 때문
-    - ![img.png](img.png)
+    - ![img.png](IMG/img_1.png)
 - .save 사용 시 before 500, after 488 -> 605ms
     - .save는 호출 즉시 db에 값을 저장하기 떄문에, 트랜잭션 격리 수준을 통해 결과의 정합성 유지 필요
     - ![img.png](IMG/img.png)
@@ -111,9 +111,8 @@ public void issueCouponSynchronize(LocalDateTime localDateTime, long eventId, lo
 ```
 
 기존 default 함수를 [synchronized](#synchronized) 적용. before : 500, after 400 -> 1s 385ms
-
-![img_1.png](img_3.png)
-![img_1.png](img_1.png)
+![img.png](IMG/img_2.png)
+![img.png](IMG/img_3.png)
 
 멀티 스레드의 장점을 살릴 수 없고 delay가 심하게 생김
 
