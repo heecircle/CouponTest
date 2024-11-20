@@ -3,7 +3,6 @@ package com.heewon.coupontest.issue.service;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.webjars.NotFoundException;
 
@@ -22,7 +21,7 @@ public class IssueService {
 	private final CouponRepository couponRepository;
 	private final CouponLogRepository couponLogRepository;
 
-	public Object issueCoupon(LocalDateTime localDateTime, long eventId, long couponId, long memberId) throws
+	public void issueCouponDefault(LocalDateTime localDateTime, long eventId, long couponId, long memberId) throws
 		Exception {
 
 		// 시간 검증 로직
@@ -33,7 +32,15 @@ public class IssueService {
 
 		//이력 저장
 		issueCouponLog(memberId, eventId);
-		return null;
+
+	}
+
+	public void issueCouponSynchronize(LocalDateTime localDateTime, long eventId, long couponId, long memberId) throws
+		Exception {
+		// 시간 검증 로직
+		synchronized (this) {
+			issueCouponDefault(localDateTime, eventId, couponId, memberId);
+		}
 
 	}
 
@@ -50,7 +57,6 @@ public class IssueService {
 		}
 	}
 
-	@Transactional
 	void issueCouponStatus(Long couponId) {
 		Coupon coupon = couponRepository.findById(couponId).orElse(null);
 
@@ -60,7 +66,9 @@ public class IssueService {
 		} else {
 			throw new NotFoundException("coupon");
 		}
-		
+
+		couponRepository.save(coupon);
+
 	}
 
 	void issueCouponLog(Long couponId, Long userId) {

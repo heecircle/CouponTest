@@ -89,9 +89,34 @@ void issueCouponStatus(Long couponId) {
 
 - Dirty Checking 을 통해 coupon에 대한 값을 업데이트 하는 케이스 before 500, after 500 -> 642ms
     - 이 경우는, 트랜잭션 종료 시점에 반영돼서 여러 트랜잭션이 같은 엔티티를 동시에 수정하면, 나중에 커밋된 트랜잭션이 이전 트랜잭션의 결과를 덮어 쓸 수 있기 때문
-      ![img_1.png](IMG/img_1.png)
+    - ![img.png](img.png)
 - .save 사용 시 before 500, after 488 -> 605ms
     - .save는 호출 즉시 db에 값을 저장하기 떄문에, 트랜잭션 격리 수준을 통해 결과의 정합성 유지 필요
     - ![img.png](IMG/img.png)
 
+### Case 2 : Synchronized를 활용한 접근 제한
+
+쓰레드 단위로 해당 메소드에 접근을 제한하는 경우
+
+한가지 java application 실행 경우에 멀티 스레드로 인한 동시성이 깨지기 때문에 한가지 쓰레드만 접근 가능한 synchronize를 메소드 단위로 적용하여 정합성 체크
+
+```Java
+public void issueCouponSynchronize(LocalDateTime localDateTime, long eventId, long couponId, long memberId) throws
+	Exception {
+
+	synchronized (this) {
+		issueCouponDefault(localDateTime, eventId, couponId, memberId);
+	}
+}
+```
+
+기존 default 함수를 [synchronized](#synchronized) 적용. before : 500, after 400 -> 1s 385ms
+
+![img_1.png](img_3.png)
+![img_1.png](img_1.png)
+
+멀티 스레드의 장점을 살릴 수 없고 delay가 심하게 생김
+
 ### Transactional?
+
+### synchronized?
