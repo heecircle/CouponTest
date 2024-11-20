@@ -58,7 +58,7 @@ public class CouponIssueConcurrencyTest {
 		assert Objects.requireNonNull(coupon).getCount() + 100 == coupon.getTotalCount();
 	}
 
-	@Test
+	// @Test
 	public void synchronize100Test() throws InterruptedException {
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
 		CountDownLatch latch = new CountDownLatch(threadCount);
@@ -70,6 +70,39 @@ public class CouponIssueConcurrencyTest {
 					LocalDateTime currentTime = LocalDateTime.of(2024, 11, 20, 9, 0, 0);
 					try {
 						issueService.issueCouponSynchronize(currentTime, 1, 1, currentMemberId);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		Coupon coupon = couponRepository.findById(1L).orElse(null);
+		if (coupon != null) {
+			System.out.println(lineDescriptor);
+			System.out.println("remain Coupon: " + coupon.getCount() + "  Total Coupon: " + coupon.getTotalCount());
+			System.out.println(lineDescriptor);
+
+		}
+		assert Objects.requireNonNull(coupon).getCount() + 100 == coupon.getTotalCount();
+	}
+
+	@Test
+	public void PessimisticLockTest() throws InterruptedException {
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(threadCount);
+
+		for (int i = 0; i < threadCount; i++) {
+			final int currentMemberId = i + 1;
+			executorService.submit(() -> {
+				try {
+					LocalDateTime currentTime = LocalDateTime.of(2024, 11, 20, 9, 0, 0);
+					try {
+						issueService.issueCouponPessimisticLock(currentTime, 1, 1, currentMemberId);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}

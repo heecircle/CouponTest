@@ -114,8 +114,16 @@ public void issueCouponSynchronize(LocalDateTime localDateTime, long eventId, lo
 ![img.png](IMG/img_2.png)
 ![img.png](IMG/img_3.png)
 
-멀티 스레드의 장점을 살릴 수 없고 delay가 심하게 생김
+멀티 스레드의 장점을 살릴 수 없고 delay 심하게 생김
+
+### Case 3: Pessimistic Lock 적용
+
+select 시점에 [pessimistic lock](#pessimistic-lock) 적용하여 값을 호출함
+
+![img.png](IMG/img_4.png)
 
 ### Transactional?
 
-### synchronized?
+### Synchronized?
+
+### Pessimistic Lock?

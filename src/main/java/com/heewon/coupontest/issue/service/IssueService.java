@@ -3,6 +3,7 @@ package com.heewon.coupontest.issue.service;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.webjars.NotFoundException;
 
@@ -44,20 +45,32 @@ public class IssueService {
 
 	}
 
+	@Transactional
+	public void issueCouponPessimisticLock(LocalDateTime localDateTime, long eventId, long couponId,
+		long memberId) throws Exception {
+
+		checkEventPeriodAndTime(eventId, localDateTime);
+
+		issueCouponPessimisticLock(couponId);
+
+		issueCouponLog(memberId, eventId);
+
+	}
+
 	/**
 	 * 시간 검증 로직
 	 * @param eventId
 	 * @param currentDateTime
 	 * @throws Exception
 	 */
-	void checkEventPeriodAndTime(Long eventId, LocalDateTime currentDateTime) throws Exception {
+	public void checkEventPeriodAndTime(Long eventId, LocalDateTime currentDateTime) throws Exception {
 		Event event = eventRepository.findById(eventId).orElse(null);
 		if (event.getStartTime().isAfter(currentDateTime) || event.getEndTime().isBefore(currentDateTime)) {
 			throw new NotAcceptableStatusException("예외 시간");
 		}
 	}
 
-	void issueCouponStatus(Long couponId) {
+	public void issueCouponStatus(Long couponId) {
 		Coupon coupon = couponRepository.findById(couponId).orElse(null);
 
 		if (coupon.getCount() > 0) {
@@ -69,6 +82,16 @@ public class IssueService {
 
 		couponRepository.save(coupon);
 
+	}
+
+	@Transactional
+	public void issueCouponPessimisticLock(Long couponId) {
+		Coupon coupon = couponRepository.findForUpdate(couponId);
+		if (coupon.getCount() > 0) {
+			coupon.setCount(coupon.getCount() - 1);
+		}
+
+		// couponRepository.save(coupon);
 	}
 
 	void issueCouponLog(Long couponId, Long userId) {
