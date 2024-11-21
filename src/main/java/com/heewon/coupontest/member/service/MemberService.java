@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	private final MemberRepository memberRepository;
 
-	public Member findMemberById(Long id){
+	public Member findMemberById(Long id) {
 		return memberRepository.findMemberById(id).orElse(new Member());
 	}
 

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.stereotype.Service;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
